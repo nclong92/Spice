@@ -95,5 +95,15 @@ namespace Spice.Areas.Admin.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null) return BadRequest();
+
+            var category = await _db.Category.FindAsync(id);
+            if (category == null) return View();
+
+            return View(category);
+        }
     }
 }
