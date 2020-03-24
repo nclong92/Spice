@@ -14,6 +14,9 @@ namespace Spice.Areas.Admin.Controllers
     {
         private readonly ApplicationDbContext _db;
 
+        [TempData]
+        public string StatusMessage { get; set; }
+
         public SubCategoryController(ApplicationDbContext db)
         {
             _db = db;
@@ -43,6 +46,43 @@ namespace Spice.Areas.Admin.Controllers
             };
 
             return View(model);
+        }
+
+        // Post - Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(SubCategoryAndCategoryViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var doesSubCategoryExists = _db.SubCategory.Include(s => s.Category)
+                                                        .Where(s => s.Name.ToLower() == model.SubCategory.Name.ToLower()
+                                                            && s.Category.Id == model.SubCategory.CategoryId);
+
+                if (doesSubCategoryExists.Count() > 0)
+                {
+                    // Error
+                    StatusMessage = $"Error: Sub Category exists under {doesSubCategoryExists.First().Category.Name} category. Please use another name.";
+                }
+                else
+                {
+                    _db.SubCategory.Add(model.SubCategory);
+                    await _db.SaveChangesAsync();
+
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+
+            SubCategoryAndCategoryViewModel modelVM = new SubCategoryAndCategoryViewModel()
+            {
+                CategoryList = await _db.Category.ToListAsync(),
+                SubCategory = model.SubCategory,
+                SubCategoryList = await _db.SubCategory.OrderBy(p => p.Name)
+                                                .Select(p => p.Name).ToListAsync(),
+                StatusMessage = StatusMessage
+            };
+
+            return View(modelVM);
         }
     }
 }
