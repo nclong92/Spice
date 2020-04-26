@@ -8,6 +8,8 @@
   <ItemGroup>
     <Compile Remove="Data\Migrations\20200402074405_AddMenuItemToDatabase.cs" />
     <Compile Remove="Data\Migrations\20200402074405_AddMenuItemToDatabase.Designer.cs" />
+    <Compile Remove="Data\Migrations\20200426105224_AddMoreFieldsToIdentityUser.cs" />
+    <Compile Remove="Data\Migrations\20200426105224_AddMoreFieldsToIdentityUser.Designer.cs" />
   </ItemGroup>
 
 

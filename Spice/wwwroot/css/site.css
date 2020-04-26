@@ -119,7 +119,7 @@ body {
 
 }
 
-    .menu-filter-list li.ischecked, .menu-filter-list li:hover {
+    .menu-filter-list li.active, .menu-filter-list li:hover {
         background-color: #545b62;
         color: #fff;
     }
