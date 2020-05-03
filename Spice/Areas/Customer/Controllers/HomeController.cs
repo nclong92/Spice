@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Spice.Data;
+using Spice.Models;
 using Spice.Models.ViewModels;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -37,6 +39,23 @@ namespace Spice.Areas.Customer.Controllers
             };
 
             return View(IndexVM);
+        }
+
+        [Authorize]
+        public async Task<IActionResult> Details(int id)
+        {
+            var menuItemFromDb = await _db.MenuItem.Include(m => m.Category)
+                                                    .Include(m => m.SubCategory)
+                                                    .Where(m => m.Id == id)
+                                                    .FirstOrDefaultAsync();
+
+            ShoppingCart cartObj = new ShoppingCart()
+            {
+                MenuItem = menuItemFromDb,
+                MenuItemId = menuItemFromDb.Id
+            };
+
+            return View(cartObj);
         }
     }
 }
