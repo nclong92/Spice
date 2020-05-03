@@ -43,7 +43,7 @@ namespace Spice.Areas.Admin.Controllers
             {
                 var files = HttpContext.Request.Form.Files;
 
-                if(files.Count > 0)
+                if (files.Count > 0)
                 {
                     byte[] p1 = null;
                     using (var fs1 = files[0].OpenReadStream())
@@ -89,12 +89,12 @@ namespace Spice.Areas.Admin.Controllers
             {
                 var files = HttpContext.Request.Form.Files;
 
-                if(files.Count > 0)
+                if (files.Count > 0)
                 {
                     byte[] p1 = null;
-                    using(var fs1 = files[0].OpenReadStream())
+                    using (var fs1 = files[0].OpenReadStream())
                     {
-                        using(var ms1 = new MemoryStream())
+                        using (var ms1 = new MemoryStream())
                         {
                             fs1.CopyTo(ms1);
                             p1 = ms1.ToArray();
@@ -115,6 +115,41 @@ namespace Spice.Areas.Admin.Controllers
             }
 
             return View(coupon);
+        }
+
+        // GET Details
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var coupon = await _db.Coupon.FirstOrDefaultAsync(m => m.Id == id);
+            if (coupon == null) return NotFound();
+
+            return View(coupon);
+        }
+
+        // Get Delete coupon
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var coupon = await _db.Coupon.SingleOrDefaultAsync(m => m.Id == id);
+
+            if (coupon == null) return NotFound();
+
+            return View(coupon);
+        }
+
+        // Post Delete coupon
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirm(int id)
+        {
+            var coupon = await _db.Coupon.SingleOrDefaultAsync(m => m.Id == id);
+            _db.Coupon.Remove(coupon);
+
+            await _db.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
     }
 }
