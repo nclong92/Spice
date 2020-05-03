@@ -1,17 +1,16 @@
 ﻿@model MenuItemViewModel
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Details";
 }
 
 <br />
-<h2 class="text-info">Delete Menu Item</h2>
+<h2 class="text-info">Details Menu Item</h2>
 <br />
 
-<form method="post">
-    <div class="backgroundWhite row">
-        <div class="col-8">
-            <input type="hidden" asp-for="MenuItem.Id" />
+<div class="backgroundWhiteBorder row">
+    <div class="col-8">
+        <fieldset disabled>
             <div class="form-group row">
                 <div class="col-4">
                     <label asp-for="MenuItem.Name" class="custom-label"></label>
@@ -52,6 +51,7 @@
                     <input asp-for="MenuItem.SubCategory.Name" class="form-control" />
                 </div>
             </div>
+
             <div class="form-group row">
                 <div class="col-4">
                     <label asp-for="MenuItem.Spicyness" class="custom-label"></label>
@@ -60,26 +60,28 @@
                     <input asp-for="MenuItem.Spicyness" class="form-control" />
                 </div>
             </div>
-        </div>
-
-        <div class="col-1">
-
-        </div>
-        <div class="col-3">
-            <img src="@Model.MenuItem.Image" width="100%" style="border-radius: 5px;border: 1px solid #bbb9bb;" />
-        </div>
-        <div class="col-8">
-            <div class="row">
-                <div class="col-4"></div>
-                <div class="col-8">
-                    <partial name="_DeleteAndBackToListButton" model="Model.MenuItem.Id" />
-                </div>
-            </div>
-
-        </div>
+        </fieldset>
     </div>
-</form>
 
+    <div class="col-1">
+
+    </div>
+    <div class="col-3">
+        <img src="@Model.MenuItem.Image" width="100%" style="border-radius: 5px;border: 1px solid #bbb9bb;" />
+    </div>
+    <div class="col-8">
+        <div class="row">
+            <div class="col-4">
+
+            </div>
+            <div class="col-8">
+                <a asp-action="Index" asp-controller="MenuItem" class="btn btn-success form-control">Back To List</a>
+            </div>
+        </div>
+        
+    </div>
+
+</div>
 @section Scripts{
 
     <script type="text/javascript">

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Spice.Data;
+using Spice.Models;
 using Spice.Models.ViewModels;
 using Spice.Utility;
 
@@ -70,13 +71,13 @@ namespace Spice.Areas.Admin.Controllers
 
             var menuItemFormDb = await _db.MenuItem.FindAsync(MenuItemVM.MenuItem.Id);
 
-            if(files.Count > 0)
+            if (files.Count > 0)
             {
                 // files has been uploaded
                 var uploads = Path.Combine(webRootPath, "images");
                 var extension = Path.GetExtension(files[0].FileName);
 
-                using(var filesStream = new FileStream(Path.Combine(uploads, MenuItemVM.MenuItem.Id + extension), FileMode.Create))
+                using (var filesStream = new FileStream(Path.Combine(uploads, MenuItemVM.MenuItem.Id + extension), FileMode.Create))
                 {
                     files[0].CopyTo(filesStream);
                 }
@@ -147,13 +148,13 @@ namespace Spice.Areas.Admin.Controllers
                 var extension_new = Path.GetExtension(files[0].FileName);
 
                 // Delete the original file
-                if(menuItemFormDb.Image != null)
+                if (menuItemFormDb.Image != null)
                 {
                     var imagePath = Path.Combine(webRootPath, menuItemFormDb.Image.TrimStart('\\'));
                     if (System.IO.File.Exists(imagePath))
                         System.IO.File.Delete(imagePath);
                 }
-                
+
                 // upload the new file
                 using (var filesStream = new FileStream(Path.Combine(uploads, MenuItemVM.MenuItem.Id + extension_new), FileMode.Create))
                 {
@@ -171,6 +172,59 @@ namespace Spice.Areas.Admin.Controllers
             menuItemFormDb.SubCategoryId = MenuItemVM.MenuItem.SubCategoryId;
 
             await _db.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // GET Details
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null) return NotFound();
+
+            MenuItemVM.MenuItem = await _db.MenuItem.Include(m => m.Category)
+                                                    .Include(m => m.SubCategory)
+                                                    .SingleOrDefaultAsync(m => m.Id == id);
+
+            if (MenuItemVM.MenuItem == null) return NotFound();
+
+            return View(MenuItemVM);
+        }
+
+        // Get Delete
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null) return NotFound();
+
+            MenuItemVM.MenuItem = await _db.MenuItem.Include(m => m.Category)
+                                                    .Include(m => m.SubCategory)
+                                                    .SingleOrDefaultAsync(m => m.Id == id);
+
+            if (MenuItemVM.MenuItem == null) return NotFound();
+
+            return View(MenuItemVM);
+        }
+
+        // POST delete
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirm(int id)
+        {
+            string webRootPath = _webHostEnvironment.WebRootPath;
+            MenuItem menuItem = await _db.MenuItem.FindAsync(id);
+
+            if (menuItem != null)
+            {
+                var imagePath = Path.Combine(webRootPath, menuItem.Image.TrimStart('\\'));
+
+                if (System.IO.File.Exists(imagePath))
+                {
+                    System.IO.File.Delete(imagePath);
+                }
+
+                _db.MenuItem.Remove(menuItem);
+
+                await _db.SaveChangesAsync();
+            }
 
             return RedirectToAction(nameof(Index));
         }
