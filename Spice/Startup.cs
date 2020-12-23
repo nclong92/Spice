@@ -15,6 +15,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Spice.Models;
+using Spice.Utility;
+using Stripe;
 
 namespace Spice
 {
@@ -82,6 +84,8 @@ namespace Spice
                 option.IterationCount = 12000;
             });
 
+            services.Configure<StripeSettings>(Configuration.GetSection("Stripe"));
+
             services.AddControllersWithViews();
             services.AddRazorPages();
 
@@ -111,6 +115,8 @@ namespace Spice
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            StripeConfiguration.ApiKey = Configuration.GetSection("Stripe")["SecretKey"];
 
             app.UseCookiePolicy();
             app.UseSession();
