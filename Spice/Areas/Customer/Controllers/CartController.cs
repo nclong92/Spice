@@ -10,6 +10,7 @@ using Spice.Data;
 using Spice.Models;
 using Spice.Models.ViewModels;
 using Spice.Utility;
+using Stripe;
 
 // For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -116,7 +117,7 @@ namespace Spice.Areas.Customer.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [ActionName("Summary")]
-        public async Task<IActionResult> SummaryPost()
+        public async Task<IActionResult> SummaryPost(string stripeToken)
         {
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
@@ -172,6 +173,38 @@ namespace Spice.Areas.Customer.Controllers
 
             await _db.SaveChangesAsync();
 
+            var options = new ChargeCreateOptions
+            {
+                Amount = Convert.ToInt32(detailCart.OrderHeader.OrderTotal * 100),
+                Currency = "usd",
+                Description = "Order ID : " + detailCart.OrderHeader.Id,
+                Source = stripeToken
+            };
+
+            var service = new ChargeService();
+            Charge charge = service.Create(options);
+
+            if (charge.BalanceTransactionId == null)
+            {
+                detailCart.OrderHeader.Status = SD.PaymentStatusRejected;
+            }
+            else
+            {
+                detailCart.OrderHeader.TransactionId = charge.BalanceTransactionId;
+            }
+
+            if (charge.Status.ToLower() == "succeeded")
+            {
+                detailCart.OrderHeader.PaymentStatus = SD.PaymentStatusApproved;
+                detailCart.OrderHeader.Status = SD.StatusSubmitted;
+            }
+            else
+            {
+                detailCart.OrderHeader.PaymentStatus = SD.PaymentStatusRejected;
+            }
+
+            await _db.SaveChangesAsync();
+
             return RedirectToAction("Index", "Home");
             //return RedirectToAction("Confirm", "Order", new { id = detailCart.OrderHeader.Id });
         }
@@ -207,7 +240,7 @@ namespace Spice.Areas.Customer.Controllers
         {
             var cart = await _db.ShoppingCart.FirstOrDefaultAsync(c => c.Id == cartId);
 
-            if(cart.Count == 1)
+            if (cart.Count == 1)
             {
                 _db.ShoppingCart.Remove(cart);
 

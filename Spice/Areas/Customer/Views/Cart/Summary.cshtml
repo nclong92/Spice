@@ -1,4 +1,8 @@
 ﻿@model Spice.Models.ViewModels.OrderDetailCart
+@using Microsoft.Extensions.Options
+
+@inject IOptions<Spice.Utility.StripeSettings> Stripe
+
 
 @{
     ViewData["Title"] = "Index";
@@ -63,7 +67,7 @@
                                             <label>Time</label>
                                         </div>
                                         <div class="col-9">
-                                            <input  asp-for="@Model.OrderHeader.PickUpTime" value="" id="timepicker" type="text" class="form-control" />
+                                            <input asp-for="@Model.OrderHeader.PickUpTime" value="" id="timepicker" type="text" class="form-control" />
                                         </div>
                                     </div>
 
@@ -85,7 +89,7 @@
                                     <ul class="list-group mb-3">
                                         @{ var total = 0.0;}
 
-                                        @foreach(var details in Model.listCart)
+                                        @foreach (var details in Model.listCart)
                                         {
                                             <li class="list-group-item d-flex justify-content-between">
                                                 <div>
@@ -99,7 +103,7 @@
                                             </li>
                                         }
 
-                                        @if(Model.OrderHeader.CouponCode != null)
+                                        @if (Model.OrderHeader.CouponCode != null)
                                         {
                                             <li class="list-group-item d-flex justify-content-between">
                                                 <div class="text-success">
@@ -124,8 +128,26 @@
                     <div class="card-footer">
                         <div class="row">
                             <div class="col-12 col-md-4 offset-md-8">
+
+                                @{
+                                    var OrderTotalForStrip = Model.OrderHeader.OrderTotal * 100;
+                                }
+
+                                <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                                        data-key="@Stripe.Value.PublishableKey"
+                                        data-amount="@OrderTotalForStrip"
+                                        data-name="Spice Restaurant"
+                                        data-lable="Place Order"
+                                        data-description="Good Food, Good Mood"
+                                        data-locale="auto"
+                                        data-allow-remember-me="false"
+                                        data-image="https://localhost:44342/images/checkoutcart.png">
+                                </script>
+                                
                                 <button type="submit" id="btnPlaceOrder" onclick="return validateInput()"
-                                        value="Place Order" class="btn btn-success form-control">Place Order</button>
+                                        value="Place Order" class="btn btn-success form-control">
+                                    Place Order
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -147,6 +169,8 @@
     <script type="text/javascript">
 
         $().ready(function () {
+
+            $('.stripe-button-el:first').hide();
 
             var minDt = 0;
             if (getTimeFromCurrentDate >= 20) {
