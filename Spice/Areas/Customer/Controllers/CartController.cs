@@ -101,6 +101,7 @@ namespace Spice.Areas.Customer.Controllers
 
             detailCart.OrderHeader.PickupName = applicationUser.Name;
             detailCart.OrderHeader.PhoneNumber = applicationUser.PhoneNumber;
+            detailCart.OrderHeader.PickUpDate = DateTime.Now;
             detailCart.OrderHeader.PickUpTime = DateTime.Now;
 
 
@@ -117,7 +118,7 @@ namespace Spice.Areas.Customer.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [ActionName("Summary")]
-        public async Task<IActionResult> SummaryPost(string stripeToken)
+        public async Task<IActionResult> SummaryPost(string stripeToken, string pickupdate)
         {
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var claim = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier);
@@ -128,7 +129,7 @@ namespace Spice.Areas.Customer.Controllers
             detailCart.OrderHeader.OrderDate = DateTime.Now;
             detailCart.OrderHeader.UserId = claim.Value;
             detailCart.OrderHeader.Status = SD.PaymentStatusPending;
-            detailCart.OrderHeader.PickUpTime = Convert.ToDateTime(detailCart.OrderHeader.PickUpDate.ToShortDateString() + " " + detailCart.OrderHeader.PickUpTime.ToShortTimeString());
+            detailCart.OrderHeader.PickUpTime = Convert.ToDateTime(pickupdate + " " + detailCart.OrderHeader.PickUpTime.ToShortTimeString());
 
             var orderDetailsList = new List<OrderDetails>();
             _db.OrderHeader.Add(detailCart.OrderHeader);

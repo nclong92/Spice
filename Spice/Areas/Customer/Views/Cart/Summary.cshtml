@@ -59,7 +59,7 @@
                                             <label>Date</label>
                                         </div>
                                         <div class="col-9">
-                                            <input asp-for="@Model.OrderHeader.PickUpDate" value="" id="datepicker" type="text" class="form-control" />
+                                            <input name="pickupdate" value="" id="datepicker" type="text" class="form-control" />
                                         </div>
                                     </div>
                                     <div class="row my-1">
@@ -110,13 +110,13 @@
                                                     <h6 class="my-0">Promo Code</h6>
                                                     <small class="text-success">@Model.OrderHeader.CouponCode</small>
                                                 </div>
-                                                <span class="text-success">$@(total - Model.OrderHeader.OrderTotal)</span>
+                                                <span class="text-success">-$@(total - Model.OrderHeader.OrderTotal)</span>
                                             </li>
                                         }
 
                                         <li class="list-group-item d-flex justify-content-between bg-light">
                                             <small class="text-info">Total (USD)</small>
-                                            <strong class="text-info">-$@(Model.OrderHeader.OrderTotal)</strong>
+                                            <strong class="text-info">$@(Model.OrderHeader.OrderTotal)</strong>
                                         </li>
 
                                     </ul>
@@ -168,7 +168,7 @@
 
     <script type="text/javascript">
 
-        $().ready(function () {
+        $(function () {
 
             $('.stripe-button-el:first').hide();
 
@@ -177,7 +177,7 @@
                 minDt = 1;
             }
 
-            $('#datepicker').datepicker({ minDate: minDt, maxDate: "+1W" });
+            $('#datepicker').datepicker({ minDate: minDt, maxDate: "+1W", dateFormat: "dd/mm/yy" });
             //$('#timepicker').timepicker({ 'minTime': '11:00 AM', 'maxTime': '9:00', step: '30' });
             $('#timepicker').timepicker({
                 timeFormat: 'h:mm p',
@@ -186,6 +186,7 @@
                 maxTime: '9:00pm',
                 defaultTime: '11',
                 startTime: '10:00',
+                step: '30',
                 dynamic: false,
                 dropdown: true,
                 scrollbar: true
@@ -195,8 +196,13 @@
 
         function setPickupTime() {
             var dateSelected = $('#datepicker').val();
+            console.log('datepicker ' + dateSelected);
+
             var dt = new Date(dateSelected);
             var today = new Date();
+
+            console.log('date ' + dt);
+            $('#datepicker').datepicker(dt);
 
             dt.setHours(0, 0, 0, 0);
 
@@ -207,6 +213,9 @@
             }
 
             $('#timepicker').timepicker('option', 'minTime', selectedTime);
+            var timepickerTest = $('#timepicker').val();
+
+            console.log('timepicker ' + timepickerTest);
 
         }
 
@@ -238,6 +247,8 @@
             var dt = $('#datepicker').val();
             var name = $('#txtName').val();
             var phone = $('#txtPhone').val();
+
+            console.log('datepicker ' + dt);
 
             if (time.toString() == '') {
                 alert('Please select pickup time');
