@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Spice.Areas.Customer.Controllers
@@ -154,6 +155,50 @@ namespace Spice.Areas.Customer.Controllers
             // Email logic to notify user that order is ready for pickup
 
             return RedirectToAction("ManageOrder", "Order");
+        }
+
+        [Authorize]
+        public async Task<IActionResult> OrderPickup(int productPage = 1)
+        {
+            //var claimsIdentitty = (ClaimsIdentity)User.Identity;
+            //var claim = claimsIdentitty.FindFirst(ClaimTypes.NameIdentifier);
+
+            var param = new StringBuilder();
+            param.Append("/Customer/Order/OrderPickup?productPage=:");
+
+            var orderListVM = new OrderListViewModel()
+            {
+                Orders = new List<OrderDetailsViewModel>()
+            };
+
+            var OrderHeaderList = await _db.OrderHeader.Include(o => o.ApplicationUser)
+                                            .Where(u => u.Status == SD.StatusReady).ToListAsync();
+
+            foreach (var item in OrderHeaderList)
+            {
+                var individual = new OrderDetailsViewModel
+                {
+                    OrderHeader = item,
+                    OrderDetails = await _db.OrderDetails.Where(o => o.OrderId == item.Id).ToListAsync()
+                };
+
+                orderListVM.Orders.Add(individual);
+            }
+
+            var count = orderListVM.Orders.Count;
+            orderListVM.Orders = orderListVM.Orders.OrderByDescending(p => p.OrderHeader.Id)
+                                            .Skip((productPage - 1) * PageSize)
+                                            .Take(PageSize).ToList();
+
+            orderListVM.PagingInfo = new PagingInfo()
+            {
+                CurrentPage = productPage,
+                ItemsPerPage = PageSize,
+                TotalItem = count,
+                urlParam = param.ToString()
+            };
+
+            return View(orderListVM);
         }
     }
 }
