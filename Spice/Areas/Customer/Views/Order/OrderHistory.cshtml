@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Spice.Models.ViewModels.OrderDetailsViewModel>
+﻿@model Spice.Models.ViewModels.OrderListViewModel
 
 @{
     ViewData["Title"] = "Order History";
@@ -26,19 +26,19 @@
     </div>
     <br />
     <div>
-        @if (Model.Count() > 0)
+        @if (Model.Orders.Count() > 0)
         {
             <table class="table table-striped border">
                 <tr class="table-secondary">
-                    <th>@Html.DisplayNameFor(m => m.OrderHeader.Id)</th>
-                    <th>@Html.DisplayNameFor(m => m.OrderHeader.PickupName)</th>
-                    <th>@Html.DisplayNameFor(m => m.OrderHeader.ApplicationUser.Email)</th>
-                    <th>@Html.DisplayNameFor(m => m.OrderHeader.PickUpTime)</th>
-                    <th>@Html.DisplayNameFor(m => m.OrderHeader.OrderTotal)</th>
+                    <th>@Html.DisplayNameFor(m => m.Orders[0].OrderHeader.Id)</th>
+                    <th>@Html.DisplayNameFor(m => m.Orders[0].OrderHeader.PickupName)</th>
+                    <th>@Html.DisplayNameFor(m => m.Orders[0].OrderHeader.ApplicationUser.Email)</th>
+                    <th>@Html.DisplayNameFor(m => m.Orders[0].OrderHeader.PickUpTime)</th>
+                    <th>@Html.DisplayNameFor(m => m.Orders[0].OrderHeader.OrderTotal)</th>
                     <th>Total Items</th>
                     <th></th>
                 </tr>
-                @foreach (var item in Model)
+                @foreach (var item in Model.Orders)
                 {
                     <tr>
                         <td>@Html.DisplayFor(m => item.OrderHeader.Id)</td>
@@ -57,6 +57,11 @@
                     </tr>
                 }
             </table>
+
+            <div page-model="@Model.PagingInfo" page-classes-enabled="true" page-class="btn border"
+                 page-class-normal="btn btn-light" page-class-selected="btn btn-info active"
+                 class="btn-group float-right"></div>
+            <br />
         }
         else
         {
@@ -84,7 +89,7 @@
     </div>
 </div>
 
-@section Scripts{ 
+@section Scripts{
 
     <script type="text/javascript">
 
