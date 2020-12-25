@@ -51,7 +51,7 @@
 
                         }
 
-                        @if(User.IsInRole(SD.ManagerUser) || User.IsInRole(SD.CustomerEndUser))
+                        @if (User.IsInRole(SD.ManagerUser) || User.IsInRole(SD.CustomerEndUser))
                         {
                             <li class="nav-item">
                                 <a asp-area="Customer" asp-controller="Order" asp-action="OrderHistory" class="nav-link">
@@ -60,11 +60,33 @@
                             </li>
                         }
 
+                        @if (User.IsInRole(SD.ManagerUser) || User.IsInRole(SD.KitchenUser) || User.IsInRole(SD.FrontDeskUser))
+                        {
+                            <li class="nav-item dropdown text-white-50">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropDownMenuLink1" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Order
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropDownMenuLink1">
+
+                                    @if (User.IsInRole(SD.ManagerUser) || User.IsInRole(SD.KitchenUser))
+                                    {
+                                        <a class="dropdown-item" asp-action="ManageOrder" asp-controller="Order" asp-area="Customer">Manage Order</a>
+                                    }
+                                    @if (User.IsInRole(SD.FrontDeskUser) || User.IsInRole(SD.ManagerUser))
+                                    {
+                                        <a class="dropdown-item" asp-action="OrderPickup" asp-controller="Order" asp-area="Customer">Order Pickup</a>
+                                    }
+                                </div>
+                            </li>
+
+
+                        }
+
                         @if (HttpContextAccessor.HttpContext.Session.GetInt32(@SD.ssShoppingCartCount) != null)
                         {
                             <li style="color:white">
                                 <a asp-area="Customer" asp-controller="Cart" asp-action="Index" class="nav-link">
-                                    @{ 
+                                    @{
                                         var count = HttpContextAccessor.HttpContext.Session.GetInt32(@SD.ssShoppingCartCount);
                                     }
 
