@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Spice.Data;
@@ -18,11 +19,14 @@ namespace Spice.Areas.Customer.Controllers
     public class OrderController : Controller
     {
         private readonly ApplicationDbContext _db;
-        private int PageSize = 2;
+        private readonly IEmailSender _emailSender;
+        private int PageSize = 10;
 
-        public OrderController(ApplicationDbContext db)
+        public OrderController(ApplicationDbContext db,
+            IEmailSender emailSender)
         {
             _db = db;
+            _emailSender = emailSender;
         }
 
         [Authorize]
@@ -139,6 +143,9 @@ namespace Spice.Areas.Customer.Controllers
             await _db.SaveChangesAsync();
 
             // Email logic to notify user that order is ready for pickup
+            await _emailSender.SendEmailAsync(_db.Users.Where(u => u.Id == orderHeader.UserId).FirstOrDefault().Email,
+                    "Spice - Order Ready for pickup " + orderHeader.Id.ToString(),
+                    "Order is ready for pickup");
 
             return RedirectToAction("ManageOrder", "Order");
         }
@@ -152,7 +159,10 @@ namespace Spice.Areas.Customer.Controllers
 
             await _db.SaveChangesAsync();
 
-            // Email logic to notify user that order is ready for pickup
+            // Email logic to notify user that order has been cancel
+            await _emailSender.SendEmailAsync(_db.Users.Where(u => u.Id == orderHeader.UserId).FirstOrDefault().Email,
+                    "Spice - Order Cancel " + orderHeader.Id.ToString(),
+                    "Order has been cancel successful");
 
             return RedirectToAction("ManageOrder", "Order");
         }
@@ -252,6 +262,11 @@ namespace Spice.Areas.Customer.Controllers
             orderHeader.Status = SD.StatusCompleted;
 
             await _db.SaveChangesAsync();
+
+            await _emailSender.SendEmailAsync(_db.Users.Where(u => u.Id == orderHeader.UserId).FirstOrDefault().Email,
+                    "Spice - Order Completed " + orderHeader.Id.ToString(),
+                    "Order has been completed successful");
+
             return RedirectToAction("OrderPickup", "Order");
         }
 
