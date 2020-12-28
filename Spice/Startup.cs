@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Spice.Models;
 using Spice.Utility;
 using Stripe;
+using Spice.Service;
 
 namespace Spice
 {
@@ -85,6 +86,8 @@ namespace Spice
             });
 
             services.Configure<StripeSettings>(Configuration.GetSection("Stripe"));
+            services.AddSingleton<IEmailSender, EmailSender>();
+            services.Configure<EmailOptions>(Configuration);
 
             services.AddControllersWithViews();
             services.AddRazorPages();
